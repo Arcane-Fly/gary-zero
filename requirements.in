@@ -3,7 +3,7 @@ ansio==0.0.1
 browser-use==0.2.5
 docker==7.1.0
 duckduckgo-search==6.1.12
-faiss-cpu==1.11.0
+faiss-cpu==1.11.0.post1
 fastmcp==2.3.4
 # Web Framework - FastAPI Migration 
 flask[async]==3.0.3
