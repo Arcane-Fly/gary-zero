@@ -1,5 +1,6 @@
 # Railway ignore file - exclude Docker files to ensure Nixpacks is used
 Dockerfile*
+dockerfile*
 docker-compose*
 .docker/
 docker/
