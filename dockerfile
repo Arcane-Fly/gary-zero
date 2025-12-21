@@ -37,6 +37,9 @@ WORKDIR /app
 # Copy dependency files first to leverage Docker cache
 COPY requirements.txt ./
 
+# Copy shared_mcp directory (needed for pip install from requirements.txt)
+COPY shared_mcp ./shared_mcp
+
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
