@@ -120,7 +120,7 @@ emoji==2.14.1
     # via unstructured
 exceptiongroup==1.3.0
     # via fastmcp
-faiss-cpu==1.11.0
+faiss-cpu==1.11.0.post1
     # via
     #   -r requirements.in
     #   browser-use
