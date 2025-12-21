@@ -6,6 +6,7 @@
 // Core utilities
 export { default as api } from './api.js';
 export { default as apiResponseHandler } from './api-response-handler.js';
+export { default as formValidator } from './form-validator.js';
 export { default as logger } from './logger.js';
 export { default as domHelpers } from './dom-helpers.js';
 export { default as timeUtils } from './time-utils.js';
