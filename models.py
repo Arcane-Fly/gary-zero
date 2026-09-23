@@ -72,13 +72,46 @@ rate_limiters: dict[str, RateLimiter] = {}
 
 # Utility function to get API keys from environment variables
 def get_api_key(service) -> str | None:
-    key_value = (
-        dotenv.get_dotenv_value(f"API_KEY_{service.upper()}")
-        or dotenv.get_dotenv_value(f"{service.upper()}_API_KEY")
-        or dotenv.get_dotenv_value(f"{service.upper()}_API_TOKEN")
-    )
-    if key_value and key_value != "None":
-        return str(key_value)
+    """Enhanced API key retrieval with Railway deployment support.
+    
+    Args:
+        service: Service name (e.g., 'openai', 'anthropic')
+        
+    Returns:
+        API key string or None if not found
+        
+    Note:
+        Supports Railway environment variables like RAILWAY_OPENAI_API_KEY
+        and standard patterns like API_KEY_OPENAI, OPENAI_API_KEY, etc.
+    """
+    service_upper = service.upper()
+    
+    # Standard patterns
+    key_patterns = [
+        f"API_KEY_{service_upper}",
+        f"{service_upper}_API_KEY",
+        f"{service_upper}_API_TOKEN",
+    ]
+    
+    # Railway deployment patterns
+    railway_patterns = [
+        f"RAILWAY_{service_upper}_API_KEY",
+        f"RAILWAY_API_KEY_{service_upper}",
+    ]
+    
+    # Check all patterns in order of preference
+    all_patterns = key_patterns + railway_patterns
+    
+    for pattern in all_patterns:
+        key_value = dotenv.get_dotenv_value(pattern)
+        if key_value and key_value != "None" and key_value.strip():
+            if os.getenv('DEBUG_MODELS'):
+                print(f"[DEBUG] Found API key for {service} using pattern: {pattern}")
+            return str(key_value).strip()
+    
+    if os.getenv('DEBUG_MODELS'):
+        print(f"[DEBUG] No API key found for {service}. Checked patterns: {all_patterns}")
+    
     return None
 
 
@@ -98,8 +131,14 @@ def get_model(model_type: ModelType, provider: ModelProvider, name: str, **kwarg
         ValueError: If provider/model combination is not supported
         Exception: If model initialization fails
     """
+    # DEBUG TRACE: Entry point (conditional)
+    if os.getenv('DEBUG_MODELS'):
+        print(f"[DEBUG] get_model() called with: model_type={model_type}, provider={provider}, name='{name}', kwargs={kwargs}")
+    
     # Construct the function name for the model getter
     fnc_name = f"get_{provider.name.lower()}_{model_type.name.lower()}"
+    if os.getenv('DEBUG_MODELS'):
+        print(f"[DEBUG] Constructed function name: '{fnc_name}'")
 
     try:
         # Check if the function exists
@@ -109,6 +148,8 @@ def get_model(model_type: ModelType, provider: ModelProvider, name: str, **kwarg
                 for k in globals()
                 if k.startswith("get_") and ("_chat" in k or "_embedding" in k)
             ]
+            if os.getenv('DEBUG_MODELS'):
+                print(f"[DEBUG] Function '{fnc_name}' not found in globals. Available functions: {available_functions[:10]}")
             raise ValueError(
                 f"Provider {provider.name} does not support "
                 f"{model_type.name} models. Function '{fnc_name}' not found. "
@@ -117,19 +158,39 @@ def get_model(model_type: ModelType, provider: ModelProvider, name: str, **kwarg
 
         # Call the function
         model_func = globals()[fnc_name]
+        if os.getenv('DEBUG_MODELS'):
+            print(f"[DEBUG] Found function '{fnc_name}', calling with args: name='{name}', kwargs={kwargs}")
+        
+        # Add a breakpoint here if needed
+        # breakpoint()  # Uncomment this line to set a breakpoint
+        
         model = model_func(name, **kwargs)
+        if os.getenv('DEBUG_MODELS'):
+            print(f"[DEBUG] Function '{fnc_name}' returned: {type(model)} - {model}")
 
         if model is None:
+            if os.getenv('DEBUG_MODELS'):
+                print(f"[DEBUG] Model function '{fnc_name}' returned None - this indicates an initialization issue")
             raise ValueError(
-                f"Model function '{fnc_name}' returned None - "
+                f"DEBUG: Model function '{fnc_name}' returned None - " \
+                f"input args: model_type={model_type}, provider={provider}, " \
+                f"name={name}, kwargs={kwargs} - "
                 f"check API key and configuration"
             )
 
+        if os.getenv('DEBUG_MODELS'):
+            print(f"[DEBUG] Successfully created model: {type(model)}")
         return model
 
     except KeyError as e:
+        if os.getenv('DEBUG_MODELS'):
+            print(f"[DEBUG] KeyError in get_model: {e}")
         raise ValueError(f"Provider function '{fnc_name}' not found: {e}") from e
     except Exception as e:
+        if os.getenv('DEBUG_MODELS'):
+            print(f"[DEBUG] Exception in get_model: {type(e).__name__}: {e}")
+        import traceback
+        traceback.print_exc()
         raise Exception(
             f"Failed to initialize {provider.name} {model_type.name} "
             f"model '{name}': {e}"
@@ -314,35 +375,126 @@ def get_anthropic_embedding(
     return OpenAIEmbeddings(model=model_name, api_key=api_key, **kwargs)
 
 
+# Model name translation layer - maps non-standard names to OpenAI API compatible names
+MODEL_NAME_ALIASES = {
+    # GPT-4.1 models exist in OpenAI API, so no translation needed
+    # "gpt-4.1", "gpt-4.1-mini" should be used as-is
+    
+    # Only translate nano variant since it doesn't exist
+    "gpt-4.1-nano": "gpt-4.1-mini",  # No nano variant exists, use mini
+    
+    # o3 models (future-proofing)
+    "o3": "o1",  # Fallback until o3 is available
+    "o3-mini": "o1-mini",
+    "o4-mini": "o1-mini",  # Future model fallback
+    
+    # Legacy aliases
+    "gpt-4-turbo-preview": "gpt-4-turbo",
+    "gpt-3.5-turbo-instruct": "gpt-3.5-turbo",
+}
+
+def translate_model_name(model_name: str) -> tuple[str, bool]:
+    """Translate model names to OpenAI API compatible names.
+    
+    Args:
+        model_name: Original model name
+        
+    Returns:
+        Tuple of (translated_name, was_translated)
+    """
+    original_name = model_name
+    translated_name = MODEL_NAME_ALIASES.get(model_name, model_name)
+    was_translated = translated_name != original_name
+    
+    if was_translated and os.getenv('DEBUG_MODELS'):
+        print(f"[DEBUG] Model name translation: '{original_name}' -> '{translated_name}'")
+    
+    return translated_name, was_translated
+
 # OpenAI models
 def get_openai_chat(
     model_name: str, api_key: str | None = None, base_url: str | None = None, **kwargs
 ) -> ChatOpenAI:
-    """Get an OpenAI chat model."""
+    """Get an OpenAI chat model with automatic model name translation."""
+    # Translate model name if needed
+    translated_name, was_translated = translate_model_name(model_name)
+    
+    if os.getenv('DEBUG_MODELS'):
+        print(f"[DEBUG] get_openai_chat() called with: model_name='{model_name}' (translated: {translated_name}), api_key={'<provided>' if api_key else 'None'}, base_url='{base_url}', kwargs={kwargs}")
+    
     final_api_key_for_constructor: str | None = None
     if api_key:  # User provided a string for the function's api_key parameter
+        if os.getenv('DEBUG_MODELS'):
+            print(f"[DEBUG] Using provided api_key parameter (type: {type(api_key)})")
         # Handle case where api_key might already be a SecretStr
         if isinstance(api_key, SecretStr) or hasattr(api_key, "get_secret_value"):
             final_api_key_for_constructor = api_key.get_secret_value()
+            if os.getenv('DEBUG_MODELS'):
+                print(f"[DEBUG] Extracted secret value from SecretStr")
         else:
             final_api_key_for_constructor = api_key
+            if os.getenv('DEBUG_MODELS'):
+                print(f"[DEBUG] Using api_key as-is")
     else:
+        if os.getenv('DEBUG_MODELS'):
+            print(f"[DEBUG] No api_key provided, retrieving from environment")
         # get_api_key returns str | None, but might return SecretStr from Railway
         v1_secret_key = get_api_key("openai")
+        if os.getenv('DEBUG_MODELS'):
+            print(f"[DEBUG] get_api_key('openai') returned: {type(v1_secret_key)} - {'<key present>' if v1_secret_key else 'None'}")
         if v1_secret_key:
             # Handle case where Railway provides SecretStr objects
             if isinstance(v1_secret_key, SecretStr) or hasattr(
                 v1_secret_key, "get_secret_value"
             ):
                 final_api_key_for_constructor = v1_secret_key.get_secret_value()
+                if os.getenv('DEBUG_MODELS'):
+                    print(f"[DEBUG] Extracted secret value from environment SecretStr")
             else:
                 final_api_key_for_constructor = str(v1_secret_key)
-    return ChatOpenAI(
-        api_key=final_api_key_for_constructor,
-        model=model_name,
-        base_url=base_url,
-        **kwargs,
-    )
+                if os.getenv('DEBUG_MODELS'):
+                    print(f"[DEBUG] Using environment key as string (length: {len(str(v1_secret_key))})")
+        else:
+            warning_message = ("No API key found for OpenAI. Please set the appropriate environment variable "
+                                "or secret store entry for your deployment (e.g., OPENAI_API_KEY or "
+                                "RAILWAY_OPENAI_API_KEY). Check your configuration and try again.")
+            print(f"⚠️ WARNING: {warning_message}")
+    
+    if os.getenv('DEBUG_MODELS'):
+        print(f"[DEBUG] Final API key for ChatOpenAI constructor: {'<key present>' if final_api_key_for_constructor else 'None'} (length: {len(final_api_key_for_constructor) if final_api_key_for_constructor else 0})")
+    
+    try:
+        if os.getenv('DEBUG_MODELS'):
+            print(f"[DEBUG] Creating ChatOpenAI instance with model='{model_name}', base_url='{base_url}'")
+            # Check if we're importing the OpenAI SDK correctly
+            from langchain_openai import ChatOpenAI as ChatOpenAIImport
+            print(f"[DEBUG] Successfully imported ChatOpenAI: {ChatOpenAIImport}")
+        
+        model_instance = ChatOpenAI(
+            api_key=final_api_key_for_constructor,
+            model=translated_name,  # Use translated name for OpenAI API
+            base_url=base_url,
+            **kwargs,
+        )
+        if os.getenv('DEBUG_MODELS'):
+            print(f"[DEBUG] Successfully created ChatOpenAI instance: {type(model_instance)}")
+            print(f"[DEBUG] Model instance has client: {hasattr(model_instance, 'client')}")
+            if hasattr(model_instance, 'client'):
+                print(f"[DEBUG] Client type: {type(model_instance.client)}")
+                if hasattr(model_instance.client, 'base_url'):
+                    print(f"[DEBUG] Client base_url: {model_instance.client.base_url}")
+        
+        return model_instance
+        
+    except Exception as e:
+        if os.getenv('DEBUG_MODELS'):
+            print(f"[DEBUG] Exception creating ChatOpenAI: {type(e).__name__}: {e}")
+            import traceback
+            traceback.print_exc()
+        error_message = ("Error creating ChatOpenAI instance. Check the model name and API key configuration, "
+                          "and ensure that the OpenAI service is accessible and correctly configured.")
+        print(f"❌ ERROR: {error_message}")
+        raise
 
 
 def get_openai_embedding(

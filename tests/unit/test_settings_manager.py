@@ -66,7 +66,7 @@ class TestSettingsManagerVolumeRefactor(unittest.TestCase):
         # Mock default settings to avoid circular imports
         mock_settings = {
             "chat_model_provider": "ANTHROPIC",
-            "chat_model_name": "claude-3-5-sonnet-20241022",
+            "chat_model_name": "claude-sonnet-4-0",
         }
 
         with patch(

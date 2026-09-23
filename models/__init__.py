@@ -3,15 +3,16 @@
 # Import necessary classes from the main models.py file
 import os
 import sys
+import importlib.util
 
-# Add the parent directory to sys.path to import from models.py
-parent_dir = os.path.dirname(os.path.dirname(__file__))
-if parent_dir not in sys.path:
-    sys.path.insert(0, parent_dir)
+# Load the models.py file directly from the parent directory
+models_py_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'models.py')
 
 try:
-    # Import from the models.py file in the parent directory
-    import models as models_module
+    # Import from the models.py file in the parent directory using importlib
+    spec = importlib.util.spec_from_file_location("models_main", models_py_path)
+    models_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(models_module)
 
     ModelProvider = models_module.ModelProvider
     ModelType = models_module.ModelType
@@ -19,7 +20,13 @@ try:
     get_model = models_module.get_model
     get_rate_limiter = models_module.get_rate_limiter
     parse_chunk = models_module.parse_chunk
-except (ImportError, AttributeError):
+    
+    # Import new functions added for Step 5 fixes
+    translate_model_name = models_module.translate_model_name
+    get_openai_chat = models_module.get_openai_chat
+    MODEL_NAME_ALIASES = models_module.MODEL_NAME_ALIASES
+except (ImportError, AttributeError) as e:
+    print(f"[DEBUG] Failed to import from models.py: {e}")
     # Fallback definitions if main models.py is not available
     from enum import Enum
 
@@ -56,3 +63,12 @@ except (ImportError, AttributeError):
             return str(chunk.content)
         else:
             return str(chunk)
+    
+    # Fallback implementations for the new functions
+    def translate_model_name(model_name):
+        return model_name, False
+    
+    def get_openai_chat(model_name, **kwargs):
+        return None
+    
+    MODEL_NAME_ALIASES = {}

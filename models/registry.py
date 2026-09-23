@@ -185,6 +185,7 @@ class ModelRegistry:
         cost_map = {
             "gpt-4o": (0.005, 0.015),
             "gpt-4o-mini": (0.00015, 0.0006),
+            "gpt-4.1-mini": (0.00015, 0.0006),  # Cost-optimized GPT-4.1 variant
             "o1": (0.015, 0.06),
             "o1-preview": (0.015, 0.06),
             "o1-mini": (0.003, 0.012),
@@ -210,11 +211,11 @@ class ModelRegistry:
             "veo-3-preview": (0.1, 0.0),  # approx
             "veo-2": (0.1, 0.0),
             "gemini-2.5-flash-live": (0.000075, 0.0003),
-            "claude-opus-4-20250514": (0.015, 0.075),
-            "claude-sonnet-4-20250514": (0.003, 0.015),
-            "claude-3-7-sonnet-20250219": (0.003, 0.015),
-            "claude-3-5-sonnet-20241022": (0.003, 0.015),
-            "claude-3-5-haiku-20241022": (0.0008, 0.004),
+            "claude-opus-4-0": (0.015, 0.075),
+            "claude-sonnet-4-0": (0.003, 0.015),
+            "claude-3-7-sonnet-latest": (0.003, 0.015),
+            "claude-3-5-sonnet-latest": (0.003, 0.015),
+            "claude-3-5-haiku-latest": (0.0008, 0.004),
             "grok-4-latest": (0.003, 0.015),
             "grok-3": (0.003, 0.015),
             "grok-3-mini": (0.0003, 0.0005),

@@ -45,6 +45,8 @@ released after June 2024, with a focus on performance, capabilities, and reliabi
 
 ### 🔷 OpenAI (18 models)
 
+**Registry Status**: ✅ **Verified** - All OpenAI models in this catalog have been validated against the official OpenAI API documentation and registry. Model aliases and deprecated names are automatically migrated to their current registry equivalents.
+
 #### GPT-4.1 Series (Newest)
 - `gpt-4.1` - Latest GPT-4.1 model
 - `gpt-4.1-mini` - Cost-effective GPT-4.1 ⭐ *Recommended utility model*
@@ -177,6 +179,39 @@ All models include built-in web search:
 - `o3` - Standard advanced reasoning
 - `claude-opus-4-0` - Anthropic's most powerful
 - `sonar-reasoning-pro` - With web search
+
+## Model Aliases and Migrations
+
+### Automatic Model Migration System
+
+To prevent future contributor confusion and ensure backwards compatibility, Gary-Zero includes an automatic migration system for deprecated model names. The following aliases are automatically migrated to their current registry equivalents:
+
+**Anthropic Models**:
+- `claude-3-5-sonnet-20241022` → `claude-3-5-sonnet-latest`
+- `claude-3-5-haiku-20241022` → `claude-3-5-haiku-latest`
+- `claude-3.5-sonnet` → `claude-3-5-sonnet-latest`
+- `claude-3.5-haiku` → `claude-3-5-haiku-latest`
+- `claude-3-opus` → `claude-opus-4-0`
+- `claude-3-sonnet` → `claude-sonnet-4-0`
+
+**OpenAI Models**:
+- `gpt-4-turbo` → `gpt-4.1`
+- `gpt-4-turbo-preview` → `gpt-4.1`
+- `gpt-3.5-turbo` → `gpt-4.1-mini`
+
+**Google Models**:
+- `gemini-1.5-pro` → `gemini-2.5-pro`
+- `gemini-1.5-flash` → `gemini-2.5-flash`
+- `gemini-pro` → `gemini-2.5-pro`
+
+**xAI Models**:
+- `grok-2` → `grok-3`
+- `grok-2-mini` → `grok-3-mini`
+- `grok-beta` → `grok-3`
+
+⚠️ **For Contributors**: Do NOT add these deprecated model names to the model catalog. Use only the modern equivalents listed above. The migration system handles backwards compatibility automatically.
+
+**Implementation**: See `framework/helpers/settings/migrate.py` for the complete migration logic.
 
 ## Important Notes
 

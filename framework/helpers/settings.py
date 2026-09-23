@@ -496,7 +496,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
             "title": "Coding agent model name",
             "description": "Select model for coding agent from the chosen provider",
             "type": "select",
-            "value": settings.get("coding_agent_name", "claude-3-5-sonnet-20241022"),
+            "value": settings.get("coding_agent_name", "claude-3-5-sonnet-latest"),
             "options": [
                 FieldOption(
                     value=str(model.get("value", "")), label=str(model.get("label", ""))
@@ -582,7 +582,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
             "description": "Select model for supervisor agent from the chosen provider",
             "type": "select",
             "value": settings.get(
-                "supervisor_agent_name", "claude-3-5-sonnet-20241022"
+                "supervisor_agent_name", "claude-3-5-sonnet-latest"
             ),
             "options": [
                 FieldOption(
@@ -1479,7 +1479,12 @@ def set_settings_delta(delta: dict, apply: bool = True):
 
 
 def normalize_settings(settings: Settings) -> Settings:
-    copy = settings.copy()
+    # Import migration utilities
+    from .settings.migrate import migrate_settings
+    
+    # Apply migrations first
+    copy = migrate_settings(settings)
+    
     default = get_default_settings()
 
     # remove keys that are not in default
@@ -1575,7 +1580,7 @@ def get_default_settings() -> Settings:
             "embed_model_rl_requests": 0,
             "embed_model_rl_input": 0,
             "browser_model_provider": "ANTHROPIC",
-            "browser_model_name": "claude-3-5-sonnet-20241022",
+            "browser_model_name": "claude-3-5-sonnet-latest",
             "browser_model_vision": True,
             "browser_model_kwargs": {"temperature": "0"},
             "agent_prompts_subdir": "default",
@@ -1613,13 +1618,13 @@ def get_default_settings() -> Settings:
             # Coding agent settings
             "coding_agent_enabled": True,
             "coding_agent_provider": "ANTHROPIC",
-            "coding_agent_name": "claude-3-5-sonnet-20241022",
+            "coding_agent_name": "claude-3-5-sonnet-latest",
             "coding_agent_ctx_length": 200000,
             "coding_agent_kwargs": {},
             # Supervisor agent settings
             "supervisor_agent_enabled": True,
             "supervisor_agent_provider": "ANTHROPIC",
-            "supervisor_agent_name": "claude-3-5-sonnet-20241022",
+            "supervisor_agent_name": "claude-3-5-sonnet-latest",
             "task_handoff_enabled": True,
             "parallel_processing_enabled": True,
             "max_parallel_agents": 3,

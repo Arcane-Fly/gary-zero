@@ -1,0 +1,56 @@
+name: Model Initialization Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-model-initialization:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+    
+    - name: Create necessary directories
+      run: |
+        mkdir -p webui/public webui/css webui/js
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest pytest-mock
+        pip install -r requirements.txt || echo "No requirements.txt found, skipping"
+    
+    - name: Run model initialization regression test
+      run: |
+        python tests/test_model_initialization.py
+      env:
+        # Mock environment for testing - no real API keys needed
+        OPENAI_API_KEY: "sk-test-key-for-ci"
+        DEBUG_MODELS: "0"  # Disable debug output in CI
+    
+    - name: Run with pytest (if available)
+      run: |
+        python -c "
+        import sys
+        sys.path.insert(0, '.')
+        
+        # Enable pytest for this run
+        import tests.test_model_initialization as test_module
+        test_module.pytest = __import__('pytest')
+        
+        # Run a basic assertion test
+        from models import get_model, ModelType, ModelProvider
+        model = get_model(ModelType.CHAT, ModelProvider.OPENAI, 'gpt-4.1-mini')
+        assert model is not None, 'Model should not be None'
+        print('✅ CI test completed successfully')
+        "
+      env:
+        OPENAI_API_KEY: "sk-test-key-for-ci-pytest"

@@ -9,28 +9,21 @@ from typing import Any
 # Model parameters database - organized by provider and model
 MODEL_PARAMETERS: dict[str, dict[str, dict[str, Any]]] = {
     "ANTHROPIC": {
-        "claude-sonnet-4-20250514": {
+        "claude-sonnet-4-0": {
             "ctx_length": 200000,
             "vision": True,
             "rl_requests": 1000,
             "rl_input": 400000,
             "rl_output": 50000,
         },
-        "claude-opus-4-20250514": {
+        "claude-opus-4-0": {
             "ctx_length": 200000,
             "vision": True,
             "rl_requests": 1000,
             "rl_input": 400000,
             "rl_output": 50000,
         },
-        "claude-opus-4-latest": {
-            "ctx_length": 200000,
-            "vision": True,
-            "rl_requests": 1000,
-            "rl_input": 400000,
-            "rl_output": 50000,
-        },
-        "claude-3-5-sonnet-20241022": {
+        "claude-3-7-sonnet-latest": {
             "ctx_length": 200000,
             "vision": True,
             "rl_requests": 1000,
@@ -52,27 +45,6 @@ MODEL_PARAMETERS: dict[str, dict[str, dict[str, Any]]] = {
             "rl_output": 50000,
         },
         "claude-3-5-haiku-latest": {
-            "ctx_length": 200000,
-            "vision": True,
-            "rl_requests": 1000,
-            "rl_input": 400000,
-            "rl_output": 50000,
-        },
-        "claude-3-7-sonnet-20250219": {
-            "ctx_length": 200000,
-            "vision": True,
-            "rl_requests": 1000,
-            "rl_input": 400000,
-            "rl_output": 50000,
-        },
-        "claude-3-5-sonnet-20241022": {
-            "ctx_length": 200000,
-            "vision": True,
-            "rl_requests": 1000,
-            "rl_input": 400000,
-            "rl_output": 50000,
-        },
-        "claude-3-5-haiku-20241022": {
             "ctx_length": 200000,
             "vision": True,
             "rl_requests": 1000,

@@ -41,7 +41,7 @@ def test_model_catalog():
         print("3. Testing specific model classifications...")
         test_cases = [
             ("OPENAI", "o3"),
-            ("ANTHROPIC", "claude-sonnet-4-20250514"),
+            ("ANTHROPIC", "claude-sonnet-4-0"),
         ]
 
         for provider, model in test_cases:

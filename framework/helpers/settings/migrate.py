@@ -12,7 +12,6 @@ MODEL_MIGRATIONS = {
     "claude-3-opus": "claude-opus-4-0",
     "claude-3-sonnet": "claude-sonnet-4-0",
     # OpenAI models
-    "gpt-4": "gpt-4.1",
     "gpt-4-turbo": "gpt-4.1",
     "gpt-4-turbo-preview": "gpt-4.1",
     "gpt-3.5-turbo": "gpt-4.1-mini",

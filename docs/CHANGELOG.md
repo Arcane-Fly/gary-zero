@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Model Registry Alignment**: Fixed mismatch between frontend and backend model handling where deprecated model names (e.g., `claude-3-5-sonnet-20241022`) weren't being properly migrated to their current registry equivalents (e.g., `claude-3-5-sonnet-latest`). Added automatic migration system to update deprecated model identifiers and ensure consistency across the application.
+
 ### Breaking Changes
 
 - **BREAKING**: Settings path migration from `/app/tmp/settings.json` to `/app/data/settings.json`

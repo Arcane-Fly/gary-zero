@@ -65,7 +65,7 @@ def test_modern_vs_deprecated_categorization():
     )
 
     # Check specific models
-    assert is_model_modern("ANTHROPIC", "claude-sonnet-4-20250514"), (
+    assert is_model_modern("ANTHROPIC", "claude-sonnet-4-0"), (
         "Claude 4 should be modern"
     )
     assert not is_model_deprecated("ANTHROPIC", "claude-2.0"), (
@@ -103,8 +103,8 @@ def test_release_dates():
     test_cases = [
         ("OPENAI", "o3", "2025-01-31"),
         ("OPENAI", "gpt-4o", "2024-05-13"),
-        ("ANTHROPIC", "claude-sonnet-4-20250514", "2025-05-14"),
-        ("ANTHROPIC", "claude-3-5-sonnet-20241022", "2024-10-22"),
+        ("ANTHROPIC", "claude-sonnet-4-0", "2025-05-14"),
+        ("ANTHROPIC", "claude-3-5-sonnet-latest", "2024-10-22"),
     ]
 
     for provider, model, expected_date in test_cases:

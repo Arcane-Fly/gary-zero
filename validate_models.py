@@ -27,24 +27,52 @@ except ImportError as e:
 def validate_model_name(provider: str, model_name: str) -> bool:
     """Validate if a model name exists for the given provider."""
 
-    # Common valid models for each provider
+    # Common valid models for each provider (verified against official docs)
     valid_models = {
         "ANTHROPIC": [
+            # Current Claude 4 models
+            "claude-opus-4-20250514",
+            "claude-sonnet-4-20250514",
+            # Claude 3.7 models  
+            "claude-3-7-sonnet-20250219",
+            # Claude 3.5 models
             "claude-3-5-sonnet-20241022",
+            "claude-3-5-sonnet-20240620",
             "claude-3-5-haiku-20241022",
+            # Claude 3 legacy models
             "claude-3-opus-20240229",
-            "claude-3-sonnet-20240229",
             "claude-3-haiku-20240307",
+            # Aliases (production should use specific versions)
+            "claude-opus-4-0",
+            "claude-sonnet-4-0", 
+            "claude-3-7-sonnet-latest",
+            "claude-3-5-sonnet-latest",
+            "claude-3-5-haiku-latest",
         ],
         "OPENAI": [
+            # Current chat models
             "gpt-4o",
             "gpt-4o-mini",
+            # O-series reasoning models
+            "o1",
+            "o1-preview", 
+            "o1-mini",
+            "o3-mini",
+            # Legacy models still supported
             "gpt-4-turbo",
             "gpt-4",
             "gpt-3.5-turbo",
+            # Embedding models
             "text-embedding-3-large",
             "text-embedding-3-small",
             "text-embedding-ada-002",
+            # Audio/image models
+            "dall-e-3",
+            "whisper-1",
+            "tts-1",
+            "tts-1-hd",
+            # Moderation
+            "omni-moderation-latest",
         ],
         "GOOGLE": [
             "gemini-1.5-pro",

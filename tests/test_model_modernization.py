@@ -92,7 +92,7 @@ class TestModelCatalogModernization:
         """Test helper functions for checking model status."""
         # Test modern model detection
         assert is_model_modern("OPENAI", "o3") is True
-        assert is_model_modern("ANTHROPIC", "claude-3-5-sonnet-20241022") is True
+        assert is_model_modern("ANTHROPIC", "claude-3-5-sonnet-latest") is True
 
         # Test deprecated model detection
         assert is_model_deprecated("OPENAI", "gpt-4") is True
@@ -100,7 +100,7 @@ class TestModelCatalogModernization:
 
         # Test that modern models are not deprecated
         assert is_model_deprecated("OPENAI", "o3") is False
-        assert is_model_deprecated("ANTHROPIC", "claude-3-5-sonnet-20241022") is False
+        assert is_model_deprecated("ANTHROPIC", "claude-3-5-sonnet-latest") is False
 
     def test_fallback_behavior(self):
         """Test fallback behavior for providers without modern models."""
