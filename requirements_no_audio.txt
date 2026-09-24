@@ -87,7 +87,7 @@ colorama==0.4.6
     # via griffe
 crontab==1.0.1
     # via -r requirements.in
-cryptography==45.0.5
+cryptography==50.0.0
     # via
     #   paramiko
     #   unstructured-client
