@@ -204,7 +204,7 @@ h2==4.2.0
     # via httpx
 hf-xet==1.1.5
     # via huggingface-hub
-hpack==4.1.0
+hpack==4.2.0
     # via h2
 html5lib==1.1
     # via unstructured
